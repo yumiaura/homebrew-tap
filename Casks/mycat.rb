@@ -16,6 +16,8 @@ cask "mycat" do
     strategy :github_latest
   end
 
+  depends_on macos: ">= :big_sur"
+
   app "mycat.app"
 
   zap trash: [
