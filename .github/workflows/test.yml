@@ -1,0 +1,36 @@
+name: Test casks
+
+# Audits the casks the way Homebrew does and installs mycat on both
+# architectures, on every push and pull request.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Tap this checkout
+        run: |
+          set -euo pipefail
+          mkdir -p "$(brew --repository)/Library/Taps/yumiaura"
+          ln -s "$GITHUB_WORKSPACE" "$(brew --repository)/Library/Taps/yumiaura/homebrew-tap"
+
+      - name: Audit
+        run: brew audit --cask --strict --online yumiaura/tap/mycat
+
+      - name: Install and check the app is there
+        run: |
+          set -euo pipefail
+          brew install --cask yumiaura/tap/mycat
+          test -d /Applications/mycat.app
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" /Applications/mycat.app/Contents/Info.plist
+          brew uninstall --cask --zap yumiaura/tap/mycat
