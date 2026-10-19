@@ -16,6 +16,9 @@ cask "mycat" do
     strategy :github_latest
   end
 
+  # myCat replaces its own .app from the Update button.
+  auto_updates true
+
   depends_on macos: ">= :big_sur"
 
   app "mycat.app"
